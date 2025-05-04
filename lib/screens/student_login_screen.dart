@@ -1,7 +1,36 @@
 import 'package:flutter/material.dart';
 
-class StudentsLoginScreen extends StatelessWidget { // Changed class name
-  const StudentsLoginScreen({super.key}); // Changed constructor
+class StudentsLoginScreen extends StatefulWidget {
+  const StudentsLoginScreen({super.key});
+
+  @override
+  State<StudentsLoginScreen> createState() => _StudentsLoginScreenState();
+}
+
+class _StudentsLoginScreenState extends State<StudentsLoginScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +45,18 @@ class StudentsLoginScreen extends StatelessWidget { // Changed class name
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    height: 200,
-                    width: 200,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      height: 200,
+                      width: 200,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Enter Your ID & Password', // Changed text
+                  'Enter Your ID & Password',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -35,7 +67,7 @@ class StudentsLoginScreen extends StatelessWidget { // Changed class name
                 const SizedBox(height: 20),
                 const TextField(
                   decoration: InputDecoration(
-                    hintText: "Student ID", // Changed hint text
+                    hintText: "Student ID",
                     hintStyle: TextStyle(color: Colors.black),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue),

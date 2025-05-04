@@ -1,12 +1,43 @@
 import 'package:flutter/material.dart';
 
-class LoginScreenAdminStaffFaculty extends StatelessWidget {
+class LoginScreenAdminStaffFaculty extends StatefulWidget {
   final String userType;
 
   const LoginScreenAdminStaffFaculty({
     super.key,
     required this.userType,
   });
+
+  @override
+  State<LoginScreenAdminStaffFaculty> createState() =>
+      _LoginScreenAdminStaffFacultyState();
+}
+
+class _LoginScreenAdminStaffFacultyState
+    extends State<LoginScreenAdminStaffFaculty>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +51,18 @@ class LoginScreenAdminStaffFaculty extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  height: 200,
-                  width: 200,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    height: 200,
+                    width: 200,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
               Text(
-                'Login as $userType',
+                'Login as ${widget.userType}',
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -68,7 +102,7 @@ class LoginScreenAdminStaffFaculty extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  if (userType == "Transport Head") {
+                  if (widget.userType == "Transport Head") {
                     Navigator.pushReplacementNamed(context, '/transportHead');
                   } else {
                     Navigator.pushReplacementNamed(context, '/feedback');
@@ -94,7 +128,7 @@ class LoginScreenAdminStaffFaculty extends StatelessWidget {
                   Navigator.pushNamed(
                     context,
                     '/forgotPassword',
-                    arguments: {'userType': userType},
+                    arguments: {'userType': widget.userType},
                   );
                 },
                 child: const Text(
