@@ -6,12 +6,11 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-
 }
 
 android {
     namespace = "com.example.fyp_feedback_flow"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion.toInt()
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -28,9 +27,9 @@ android {
         applicationId = "com.example.fyp_feedback_flow"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
+        minSdk = 23
+        targetSdk = 34
+        versionCode = flutter.versionCode.toInt()
         versionName = flutter.versionName
     }
 
@@ -46,4 +45,3 @@ android {
 flutter {
     source = "../.."
 }
-

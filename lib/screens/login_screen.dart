@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,19 +13,60 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
 
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        Navigator.pop(context);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+      await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential =
+      await _auth.signInWithCredential(credential);
+
+      Navigator.pop(context);
+
+      if (userCredential.user != null) {
+        Navigator.pushReplacementNamed(context, '/feedback');
+      }
+    } catch (error) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In Error: ${error.toString()}')),
+      );
+      debugPrint('Google Sign-In Error: $error');
+    }
   }
 
   @override
@@ -63,11 +106,7 @@ class _LoginScreenState extends State<LoginScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              _buildLoginButton(
-                context,
-                'Student',
-                '/studentsLogin',
-              ),
+              _buildLoginButton(context, 'Student', '/studentsLogin'),
               _buildLoginButton(
                 context,
                 'Transport Head',
@@ -87,6 +126,22 @@ class _LoginScreenState extends State<LoginScreen>
                 'Faculty/Staff',
               ),
               const SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: _signInWithGoogle,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.g_mobiledata, size: 24),
+                    SizedBox(width: 10),
+                    Text('Sign in with Google'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
               TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/createNewAccount');

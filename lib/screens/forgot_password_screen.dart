@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -11,6 +12,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   String _selectedUserType = 'Student';
+  bool _isLoading = false;
+  final _auth = FirebaseAuth.instance;
 
   @override
   void didChangeDependencies() {
@@ -19,6 +22,51 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (args != null && args['userType'] != null) {
       _selectedUserType = args['userType']!;
     }
+  }
+
+  Future<void> _sendPasswordResetEmail() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
+      _showConfirmation();
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Error sending reset email';
+      if (e.code == 'user-not-found') {
+        errorMessage = 'No user found with that email';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'Invalid email format';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Recovery Email Sent'),
+        content: Text(
+          'Instructions have been sent to ${_emailController.text}\n'
+              'Please check your email to reset your password.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -78,9 +126,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                 ],
                 onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedUserType = newValue!;
-                  });
+                  setState(() => _selectedUserType = newValue!);
                 },
               ),
               const SizedBox(height: 20),
@@ -88,7 +134,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 controller: _emailController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: 'Registered Email or Username',
+                  labelText: 'Registered Email',
                   labelStyle: const TextStyle(color: Colors.white),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -96,20 +142,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email or username';
+                    return 'Please enter your email';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Please enter a valid email';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: _showConfirmation,
+                onPressed: _isLoading ? null : _sendPasswordResetEmail,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3591CF),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   minimumSize: const Size(double.infinity, 40),
                 ),
-                child: const Text(
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text(
                   'Send Recovery Instructions',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -119,30 +170,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
       ),
     );
-  }
-
-  void _showConfirmation() {
-    if (_formKey.currentState!.validate()) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Recovery Email Sent'),
-          content: Text(
-            'Instructions have been sent to ${_emailController.text}\n'
-                'Please check your email to reset your password.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
   }
 
   @override
