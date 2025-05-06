@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "793999488248",
+    "project_id": "fyp-feedback-flow-b588e",
+    "storage_bucket": "fyp-feedback-flow-b588e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:793999488248:android:ef0dd755cc83ae7b5e370d",
+        "android_client_info": {
+          "package_name": "com.example.fyp_feedback_flow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSx4DP8z7sBpHjQnJPFoCR2ZT7qZOYj6k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
