@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'feedback_students_staff_faculty.dart'; // Add this import
 
-class FeedbackSubmittedSuccessfully extends StatelessWidget {
-  const FeedbackSubmittedSuccessfully({super.key});
+class FeedbackSubmittedSuccessfully extends StatefulWidget {
+  final String? response;
+  const FeedbackSubmittedSuccessfully({super.key, this.response});
 
+  @override
+  State<FeedbackSubmittedSuccessfully> createState() =>
+      _FeedbackSubmittedSuccessfullyState();
+}
+
+class _FeedbackSubmittedSuccessfullyState
+    extends State<FeedbackSubmittedSuccessfully> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,11 +20,7 @@ class FeedbackSubmittedSuccessfully extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.check_circle,
-              color: Colors.blue,
-              size: 100,
-            ),
+            const Icon(Icons.check_circle, color: Colors.blue, size: 100),
             const SizedBox(height: 20),
             const Text(
               'THANK YOU FOR YOUR FEEDBACK',
@@ -30,14 +34,30 @@ class FeedbackSubmittedSuccessfully extends StatelessWidget {
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                'YOUR FEEDBACK IS SUBMITTED TO TRANSPORT ADMIN',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
+              child: RichText(
                 textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text:
+                          'YOUR FEEDBACK IS SUBMITTED. Your response is '
+                              .toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    TextSpan(
+                      text: widget.response?.toUpperCase(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 30),
@@ -48,19 +68,19 @@ class FeedbackSubmittedSuccessfully extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (context) => const FeedbackStudentsStaffFaculty(),
                   ),
-                      (route) => false,
+                  (route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
               ),
               child: const Text(
                 'OK',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ],

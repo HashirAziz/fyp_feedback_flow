@@ -10,6 +10,41 @@ class ChatbotScreen extends StatefulWidget {
 class _ChatbotScreenState extends State<ChatbotScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  final TextEditingController _textController = TextEditingController();
+
+  final List<Map<String, String>> _messages = [
+    {
+      "sender": "bot",
+      "text": "Hello! I'm here to help with any transport-related questions.",
+    },
+    {
+      "sender": "user",
+      "text": "Hi, when will the university bus arrive at pwd road?",
+    },
+    {"sender": "bot", "text": "The bus no 6  will arrive at sharp 7: 30 AM."},
+    {
+      "sender": "user",
+      "text": "Thanks! Whats the departure time of this stop?",
+    },
+    {
+      "sender": "bot",
+      "text": "It will be around 2 to 2:15 pm, depends on traffic.",
+    },
+  ];
+
+  void _sendMessage() {
+    final text = _textController.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() {
+      _messages.add({"sender": "user", "text": text});
+      _messages.add({
+        "sender": "bot",
+        "text": "Hi! How can i help you today?: \"$text\"",
+      });
+      _textController.clear();
+    });
+  }
 
   @override
   void initState() {
@@ -23,7 +58,34 @@ class _ChatbotScreenState extends State<ChatbotScreen>
   @override
   void dispose() {
     _controller.dispose();
+    _textController.dispose();
     super.dispose();
+  }
+
+  Widget _buildMessageBubble(Map<String, String> message) {
+    final isUser = message['sender'] == 'user';
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: isUser ? Colors.grey[700] : const Color(0xFF3591CF),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(12),
+            topRight: const Radius.circular(12),
+            bottomLeft:
+                isUser ? const Radius.circular(12) : const Radius.circular(0),
+            bottomRight:
+                isUser ? const Radius.circular(0) : const Radius.circular(12),
+          ),
+        ),
+        child: Text(
+          message['text'] ?? '',
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+    );
   }
 
   @override
@@ -67,7 +129,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                     ],
                   ),
                   child: const Icon(
-                    Icons.support_agent, // Changed to customer support icon
+                    Icons.support_agent,
                     size: 60,
                     color: Colors.white,
                   ),
@@ -86,29 +148,12 @@ class _ChatbotScreenState extends State<ChatbotScreen>
           ),
           const SizedBox(height: 10),
           Expanded(
-            child: ListView(
+            child: ListView.builder(
               padding: const EdgeInsets.all(16.0),
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF3591CF),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                        bottomRight: Radius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      "Hello! I'm here to help with any transport-related questions.",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ],
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                return _buildMessageBubble(_messages[index]);
+              },
             ),
           ),
           Container(
@@ -118,6 +163,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _textController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.grey[400],
@@ -138,9 +184,7 @@ class _ChatbotScreenState extends State<ChatbotScreen>
                   backgroundColor: const Color(0xFF3591CF),
                   child: IconButton(
                     icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: () {
-                      // Send message functionality
-                    },
+                    onPressed: _sendMessage,
                   ),
                 ),
               ],

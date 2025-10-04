@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:fyp_feedback_flow/routes/app_routes.dart';
+import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,13 +24,14 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 6),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     Timer(const Duration(seconds: 3), () {
       _controller.stop();
-      Navigator.pushReplacementNamed(context, '/login');
+      Get.offNamed(AppRoutes.getStartedScreen);
     });
   }
 
@@ -40,15 +43,17 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: Image.asset(
-            'assets/images/logo.png',
-            height: 400,
-            width: 400,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Image.asset(
+              'assets/images/logo.png',
+              height: 400,
+              width: 400,
+            ),
           ),
         ),
       ),

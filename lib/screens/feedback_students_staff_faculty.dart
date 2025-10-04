@@ -1,4 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'feedback_submitted_successfully.dart';
 import 'chatbot_screen.dart'; // Add this import
 
@@ -6,18 +11,61 @@ class FeedbackStudentsStaffFaculty extends StatefulWidget {
   const FeedbackStudentsStaffFaculty({super.key});
 
   @override
-  State<FeedbackStudentsStaffFaculty> createState() => _FeedbackStudentsStaffFacultyState();
+  State<FeedbackStudentsStaffFaculty> createState() =>
+      _FeedbackStudentsStaffFacultyState();
 }
 
-class _FeedbackStudentsStaffFacultyState extends State<FeedbackStudentsStaffFaculty> {
+class _FeedbackStudentsStaffFacultyState
+    extends State<FeedbackStudentsStaffFaculty> {
   final TextEditingController _textFeedbackController = TextEditingController();
-  final TextEditingController _voiceFeedbackController = TextEditingController();
+  final TextEditingController _voiceFeedbackController =
+      TextEditingController();
 
   @override
   void dispose() {
     _textFeedbackController.dispose();
     _voiceFeedbackController.dispose();
     super.dispose();
+  }
+
+  String _response = "";
+
+  // Function to call Flask API
+  Future<void> _submitReview() async {
+    String review = _textFeedbackController.text;
+
+    if (review.isEmpty) {
+      setState(() {
+        _response = "Please enter a review.";
+      });
+      return;
+    }
+
+    // API URL (Change this to your server URL)
+    final String apiUrl = 'http://192.168.0.106:5000/predict';
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'reviews': review}),
+      );
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        setState(() {
+          _response = "${data['predicted_sentiments'][0]}";
+        });
+      } else {
+        setState(() {
+          _response = "Failed to get response.";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _response = "Error: $e";
+      });
+    }
   }
 
   @override
@@ -84,18 +132,24 @@ class _FeedbackStudentsStaffFacultyState extends State<FeedbackStudentsStaffFacu
               Align(
                 alignment: Alignment.centerLeft,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_textFeedbackController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Please enter your feedback before submitting'),
+                          content: Text(
+                            'Please enter your feedback before submitting',
+                          ),
                         ),
                       );
                     } else {
+                      await _submitReview();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const FeedbackSubmittedSuccessfully(),
+                          builder:
+                              (context) => FeedbackSubmittedSuccessfully(
+                                response: _response,
+                              ),
                         ),
                       );
                       _textFeedbackController.clear();
@@ -111,10 +165,7 @@ class _FeedbackStudentsStaffFacultyState extends State<FeedbackStudentsStaffFacu
                   ),
                   child: const Text(
                     "Submit",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -140,14 +191,18 @@ class _FeedbackStudentsStaffFacultyState extends State<FeedbackStudentsStaffFacu
                     if (_voiceFeedbackController.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Please record your voice feedback before submitting'),
+                          content: Text(
+                            'Please record your voice feedback before submitting',
+                          ),
                         ),
                       );
                     } else {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const FeedbackSubmittedSuccessfully(),
+                          builder:
+                              (context) =>
+                                  const FeedbackSubmittedSuccessfully(),
                         ),
                       );
                       _voiceFeedbackController.clear();
@@ -163,10 +218,7 @@ class _FeedbackStudentsStaffFacultyState extends State<FeedbackStudentsStaffFacu
                   ),
                   child: const Text(
                     "Submit",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -196,10 +248,7 @@ class _FeedbackStudentsStaffFacultyState extends State<FeedbackStudentsStaffFacu
                   icon: const Icon(Icons.chat, color: Colors.white),
                   label: const Text(
                     "FEEDCHAT",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
